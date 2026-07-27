@@ -1,0 +1,23 @@
+{
+  "name": "code-craft-studio-fullstack",
+  "version": "1.0.0",
+  "description": "Full Stack Web Application for Code Craft Studio Digital Agency",
+  "main": "server/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server/index.js",
+    "server": "node server/index.js",
+    "client": "npm run dev --prefix client",
+    "dev": "node server/index.js",
+    "build": "cd client && npm install && npm run build"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.8.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "nodemailer": "^9.0.3",
+    "sql.js": "^1.14.1",
+    "sqlite3": "^6.0.1"
+  }
+}
