@@ -58,7 +58,7 @@ export default function AdminDashboard() {
         if (statRes.success) setStats(statRes.data);
         setLoading(false);
       })
-      .catch(console.error);
+      .catch((error) => { console.error(error); setLoading(false); });
   };
 
   const handleSaveProject = () => {
