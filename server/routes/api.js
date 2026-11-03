@@ -85,7 +85,7 @@ router.put('/inquiries/:id/status', requireAdmin, asyncRoute(async (req, res) =>
 router.get('/projects/track/:code', asyncRoute(async (req, res) => {
   const code = clean(req.params.code,24).toUpperCase();
   if (!/^CCS-[A-F0-9]{12}$/.test(code)) return res.status(404).json({ success:false,error:'Enter the private tracking code shared by our team.' });
-  const project = await queryOne('SELECT tracking_code, project_name, service_category, progress_percent, current_phase, milestones, latest_update, target_completion, status FROM projects WHERE tracking_code = ?', [code]);
+  const project = await queryOne('SELECT tracking_code, project_name, service_category, progress_percent, current_phase, milestones, latest_update, target_completion, status, total_cost, amount_paid FROM projects WHERE tracking_code = ?', [code]);
   if (!project) return res.status(404).json({ success:false,error:'No project found for this tracking code.' });
   res.json({ success:true,data:{ ...project, milestones:safeJson(project.milestones) } });
 }));
