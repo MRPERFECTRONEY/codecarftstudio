@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Code2, Menu, X } from 'lucide-react';
 
-export default function Navbar({ activeTab, setActiveTab, currency, setCurrency }) {
+export default function Navbar({ activeTab, setActiveTab, currency, setCurrency, isAdminMode, setIsAdminMode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleNavClick = (tab, targetId = null) => {
@@ -121,6 +121,10 @@ export default function Navbar({ activeTab, setActiveTab, currency, setCurrency 
             About Us
           </button>
 
+          <button
+            onClick={() => setIsAdminMode(!isAdminMode)}
+            style={{ background:'none', border:'none', color:isAdminMode ? 'var(--cyan-glow)' : 'var(--text-muted)', fontSize:'0.9rem', fontWeight:600, cursor:'pointer' }}
+          >{isAdminMode ? 'Back to site' : 'Admin'}</button>
           <button 
             onClick={() => handleNavClick('contact')}
             style={{

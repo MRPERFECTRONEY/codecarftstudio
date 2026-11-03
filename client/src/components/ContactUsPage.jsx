@@ -170,7 +170,7 @@ export default function ContactUsPage({ currency = 'INR' }) {
           </div>
         </div>
 
-        {/* Contact Proposal Form (Saves to real SQLite DB) */}
+        {/* Contact Proposal Form (Saves securely to PostgreSQL) */}
         <div className="glass-panel" style={{ maxWidth: '840px', margin: '0 auto 80px auto', padding: '44px' }}>
           {submittedCode ? (
             /* Success State */
@@ -188,7 +188,7 @@ export default function ContactUsPage({ currency = 'INR' }) {
                 Inquiry Submitted & Saved to Database!
               </h3>
               <p style={{ fontSize: '1.05rem', color: 'var(--text-muted)', maxWidth: '520px', margin: '0 auto 32px auto' }}>
-                Your project proposal specification has been recorded into our SQLite database. Use your unique code below to track status:
+                Your project proposal specification has been recorded securely in our database. Use your unique code below to track status:
               </p>
 
               <div style={{
@@ -319,7 +319,7 @@ export default function ContactUsPage({ currency = 'INR' }) {
                 disabled={submitting}
                 style={{ justifyContent: 'center', padding: '16px', fontSize: '1.05rem', marginTop: '10px' }}
               >
-                {submitting ? 'Persisting to SQLite Database...' : 'Submit Proposal Request'}
+                {submitting ? 'Submitting securely...' : 'Submit Proposal Request'}
                 <Send size={18} />
               </button>
             </form>
