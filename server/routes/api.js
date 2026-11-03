@@ -51,7 +51,7 @@ router.post('/inquiries', asyncRoute(async (req, res) => {
   const body = req.body || {};
   const client_name = clean(body.client_name,120), client_email = clean(body.client_email,254).toLowerCase(), project_type = clean(body.project_type,120);
   if (!client_name || !validEmail(client_email) || !project_type) return res.status(400).json({ success: false, error: 'A valid name, email and project type are required.' });
-  const tracking_code = 'CCS-' + crypto.randomInt(100000, 999999);
+  const tracking_code = 'CCS-' + crypto.randomBytes(6).toString('hex').toUpperCase();
   const client_phone = clean(body.client_phone,40), company_name = clean(body.company_name,160);
   const estimated_budget = clean(body.estimated_budget,100), estimated_timeline = clean(body.estimated_timeline,100);
   const description = clean(body.description,4000);
