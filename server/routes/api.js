@@ -7,7 +7,7 @@ import { sendInquiryNotificationEmail } from '../email.js';
 const router = express.Router();
 const loginAttempts = new Map();
 const safeJson = (value, fallback = []) => { try { return typeof value === 'string' ? JSON.parse(value) : (value ?? fallback); } catch { return fallback; } };
-const clean = (value, max = 2000) => String(value ?? '').trim().slice(0, max);
+const clean = (value, max = 2000) => String(value ?? '').replace(/[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F\\u007F]/g, '').trim().slice(0, max);
 const validEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 const asyncRoute = (handler) => (req, res, next) => Promise.resolve(handler(req, res, next)).catch((error) => {
   console.error('[API]', error);
