@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ShieldCheck, Layers, Users, DollarSign, Database, Plus, RefreshCw, CheckCircle, Edit3, Save, X } from 'lucide-react';
-import { fetchInquiries, fetchProjects, updateProject, updateInquiryStatus, addPortfolioItem, fetchStats } from '../services/api';
+import { fetchInquiries, fetchProjects, updateProject, updateInquiryStatus, addPortfolioItem, fetchStats, adminLogin, adminLogout, hasAdminSession } from '../services/api';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('projects');
@@ -8,6 +8,11 @@ export default function AdminDashboard() {
   const [inquiries, setInquiries] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [authenticated, setAuthenticated] = useState(hasAdminSession());
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [loginBusy, setLoginBusy] = useState(false);
 
   // Edit Project Modal
   const [editingProject, setEditingProject] = useState(null);
@@ -24,9 +29,25 @@ export default function AdminDashboard() {
     demo_url: ''
   });
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  useEffect(() => { if (authenticated) loadData(); }, [authenticated]);
+
+  const handleLogin = async (event) => {
+    event.preventDefault(); setLoginBusy(true); setLoginError('');
+    try { const result = await adminLogin(loginEmail, loginPassword); if (result.success) { setAuthenticated(true); setLoginPassword(''); } else setLoginError(result.error || 'Sign-in failed.'); }
+    catch { setLoginError('Unable to connect to the server.'); } finally { setLoginBusy(false); }
+  };
+
+  if (!authenticated) return (
+    <section style={{minHeight:'70vh',display:'grid',placeItems:'center',padding:'40px 20px'}}>
+      <form onSubmit={handleLogin} className="glass-panel" style={{width:'min(100%,440px)',padding:'36px',display:'grid',gap:'18px'}}>
+        <div><ShieldCheck size={30} color="#a78bfa"/><h2 style={{color:'#fff',fontSize:'1.7rem',marginTop:'12px'}}>Admin sign in</h2><p style={{color:'var(--text-muted)'}}>Use the administrator credentials configured in the hosting environment.</p></div>
+        <label style={{color:'#cbd5e1'}}>Email<input required type="email" autoComplete="username" value={loginEmail} onChange={e=>setLoginEmail(e.target.value)} style={{display:'block',width:'100%',marginTop:8,padding:12,borderRadius:8,background:'rgba(255,255,255,.05)',color:'#fff',border:'1px solid var(--border-glass)'}}/></label>
+        <label style={{color:'#cbd5e1'}}>Password<input required type="password" autoComplete="current-password" value={loginPassword} onChange={e=>setLoginPassword(e.target.value)} style={{display:'block',width:'100%',marginTop:8,padding:12,borderRadius:8,background:'rgba(255,255,255,.05)',color:'#fff',border:'1px solid var(--border-glass)'}}/></label>
+        {loginError && <p role="alert" style={{color:'#fca5a5'}}>{loginError}</p>}
+        <button className="btn-glow-cyan" disabled={loginBusy}>{loginBusy?'Signing in…':'Sign in securely'}</button>
+      </form>
+    </section>
+  );
 
   const loadData = () => {
     setLoading(true);
@@ -73,7 +94,7 @@ export default function AdminDashboard() {
       featured: 1
     }).then(res => {
       if (res.success) {
-        alert('New portfolio item saved to SQLite database!');
+        alert('New portfolio item saved to PostgreSQL database!');
         setNewPortfolio({
           title: '',
           category: 'Web App',
@@ -103,7 +124,7 @@ export default function AdminDashboard() {
               </h2>
             </div>
             <p style={{ fontSize: '0.92rem', color: 'var(--text-muted)' }}>
-              Manage client projects, update progress %, process inquiry submissions, and inspect SQLite tables.
+              Manage client projects, update delivery progress, and process inquiry submissions securely.
             </p>
           </div>
 
@@ -131,14 +152,14 @@ export default function AdminDashboard() {
           <div className="glass-panel" style={{ padding: '24px' }}>
             <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>Pipeline Revenue</div>
             <div style={{ fontSize: '2rem', fontWeight: 800, color: '#34d399', marginTop: '4px' }}>
-              ${(stats?.total_revenue_pipeline || 42500).toLocaleString()}
+              ${(stats?.total_revenue_pipeline || 0).toLocaleString()}
             </div>
           </div>
 
           <div className="glass-panel" style={{ padding: '24px' }}>
-            <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>SQLite Database</div>
+            <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600 }}>PostgreSQL Database</div>
             <div style={{ fontSize: '1.2rem', fontWeight: 700, color: '#34d399', marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Database size={18} /> Persistent SQL
+              <Database size={18} /> Managed SQL
             </div>
           </div>
         </div>
