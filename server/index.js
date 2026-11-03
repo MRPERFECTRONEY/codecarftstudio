@@ -1,63 +1,34 @@
 import express from 'express';
 import cors from 'cors';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { initDatabase } from './database.js';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { initDatabase, closeDatabase } from './database.js';
 import apiRouter from './routes/api.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 const app = express();
-const PORT = process.env.PORT || 5000;
-
-// Enable CORS & JSON parsing
-app.use(cors());
-app.use(express.json());
-
-// Initialize SQLite Database before handling requests
-console.log('[SERVER] Initializing Code Craft Studio Server...');
-await initDatabase();
-
-// Mount API Routes
+const PORT = Number(process.env.PORT || 5000);
+const allowedOrigins = (process.env.CORS_ORIGIN || '').split(',').map(x=>x.trim()).filter(Boolean);
+app.disable('x-powered-by');
+app.use(cors({ origin: (origin, callback) => {
+  if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) return callback(null, true);
+  return callback(new Error('Origin not allowed by CORS'));
+}, credentials: false }));
+app.use(express.json({ limit: '32kb' }));
 app.use('/api', apiRouter);
-
-// Serve static frontend in production if built
 const clientDistPath = path.join(__dirname, '../client/dist');
 app.use(express.static(clientDistPath));
-
-app.get('*', (req, res, next) => {
-  if (req.path.startsWith('/api')) {
-    return next();
-  }
-  res.sendFile(path.join(clientDistPath, 'index.index.html'), (err) => {
-    if (err) {
-      res.sendFile(path.join(clientDistPath, 'index.html'), (err2) => {
-        if (err2) {
-          res.send('Code Craft Studio API Server is running! Front-end dev server active on Vite port.');
-        }
-      });
-    }
-  });
+app.get('*', (req,res,next) => {
+  if (req.path.startsWith('/api/')) return next();
+  res.sendFile(path.join(clientDistPath,'index.html'), error => { if(error) next(error); });
 });
-
-const server = app.listen(PORT, () => {
-  console.log(`\n==================================================`);
-  console.log(`🚀 CODE CRAFT STUDIO SERVER RUNNING ON PORT ${PORT}`);
-  console.log(`📡 API Endpoints: http://localhost:${PORT}/api/health`);
-  console.log(`==================================================\n`);
+app.use((err,_req,res,_next) => {
+  console.error('[SERVER]',err);
+  res.status(500).json({success:false,error:'Internal server error.'});
 });
-
-server.on('error', (err) => {
-  if (err.code === 'EADDRINUSE') {
-    console.log(`\n[WARN] Port ${PORT} is in use. Trying fallback port ${PORT + 1}...`);
-    app.listen(PORT + 1, () => {
-      console.log(`\n==================================================`);
-      console.log(`🚀 CODE CRAFT STUDIO SERVER RUNNING ON PORT ${PORT + 1}`);
-      console.log(`📡 API Endpoints: http://localhost:${PORT + 1}/api/health`);
-      console.log(`==================================================\n`);
-    });
-  } else {
-    console.error('[SERVER ERROR]', err);
-  }
-});
+await initDatabase();
+const server = app.listen(PORT, () => console.log('[SERVER] CodeCraft Studio listening on '+PORT));
+const shutdown = async () => { server.close(); await closeDatabase(); process.exit(0); };
+process.on('SIGTERM',shutdown);
+process.on('SIGINT',shutdown);
