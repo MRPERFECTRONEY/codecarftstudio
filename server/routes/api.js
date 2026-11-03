@@ -5,6 +5,7 @@ import { issueAdminToken, requireAdmin, verifyAdminCredentials } from '../auth.j
 import { sendInquiryNotificationEmail } from '../email.js';
 
 const router = express.Router();
+const loginAttempts = new Map();
 const safeJson = (value, fallback = []) => { try { return typeof value === 'string' ? JSON.parse(value) : (value ?? fallback); } catch { return fallback; } };
 const clean = (value, max = 2000) => String(value ?? '').trim().slice(0, max);
 const validEmail = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
@@ -19,9 +20,17 @@ router.get('/health', asyncRoute(async (_req, res) => {
 }));
 
 router.post('/admin/login', asyncRoute(async (req, res) => {
+  const ip = req.ip || req.socket.remoteAddress || 'unknown';
+  const now = Date.now();
+  const recent = (loginAttempts.get(ip) || []).filter(time => now - time < 15 * 60 * 1000);
+  if (recent.length >= 5) return res.status(429).json({ success:false,error:'Too many sign-in attempts. Try again in 15 minutes.' });
   const email = clean(req.body?.email, 254);
-  const password = String(req.body?.password ?? '');
-  if (!verifyAdminCredentials(email, password)) return res.status(401).json({ success: false, error: 'Invalid email or password.' });
+  const password = String(req.body?.password ?? '').slice(0,256);
+  if (!verifyAdminCredentials(email, password)) {
+    recent.push(now); loginAttempts.set(ip,recent);
+    return res.status(401).json({ success: false, error: 'Invalid email or password.' });
+  }
+  loginAttempts.delete(ip);
   res.json({ success: true, token: issueAdminToken(), expiresIn: 28800 });
 }));
 
