@@ -122,9 +122,9 @@ export default function Navbar({ activeTab, setActiveTab, currency, setCurrency,
           </button>
 
           <button
-            onClick={() => setIsAdminMode(true)}
+            onClick={() => setIsAdminMode(!isAdminMode)}
             style={{ background:'none', border:'none', color:isAdminMode ? 'var(--cyan-glow)' : 'var(--text-muted)', fontSize:'0.9rem', fontWeight:600, cursor:'pointer' }}
-          >Admin</button>
+          >{isAdminMode ? 'Back to site' : 'Admin'}</button>
           <button 
             onClick={() => handleNavClick('contact')}
             style={{
