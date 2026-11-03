@@ -1,0 +1,18 @@
+name: CodeCraft Studio CI
+on:
+  push:
+    branches: [main, production-ready-postgres]
+  pull_request:
+    branches: [main]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install
+      - run: npm install --prefix client
+      - run: node --check server/index.js && node --check server/database.js && node --check server/auth.js && node --check server/routes/api.js
+      - run: npm run build --prefix client
