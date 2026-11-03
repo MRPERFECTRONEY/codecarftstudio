@@ -4,14 +4,14 @@ import { trackProject } from '../services/api';
 import { formatPrice } from '../services/currency';
 
 export default function ClientTracker({ defaultCode = '', currency = 'INR' }) {
-  const [searchCode, setSearchCode] = useState(defaultCode || 'CCS-98421');
+  const [searchCode, setSearchCode] = useState(defaultCode || '');
   const [projectData, setProjectData] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (searchCode) handleSearch(searchCode);
-  }, []);
+    if (defaultCode) handleSearch(defaultCode);
+  }, [defaultCode]);
 
   const handleSearch = (codeToSearch) => {
     const query = codeToSearch || searchCode;
@@ -51,7 +51,7 @@ export default function ClientTracker({ defaultCode = '', currency = 'INR' }) {
             Track Your <span className="gradient-text-purple">Project Delivery Status</span>
           </h2>
           <p style={{ fontSize: '1.05rem', color: 'var(--text-muted)', maxWidth: '620px', margin: '0 auto' }}>
-            Enter your unique Tracking Code (e.g. <strong style={{ color: 'var(--cyan-glow)' }}>CCS-98421</strong>) or client email to inspect live milestones, progress %, and developer notes.
+            Enter the private tracking code shared by our team to view your project milestones, progress, and latest update.
           </p>
         </div>
 
@@ -66,7 +66,7 @@ export default function ClientTracker({ defaultCode = '', currency = 'INR' }) {
                 type="text"
                 value={searchCode}
                 onChange={e => setSearchCode(e.target.value)}
-                placeholder="Enter Tracking Code or Email (e.g. CCS-98421)..."
+                placeholder="Enter your private tracking code…"
                 style={{
                   width: '100%',
                   padding: '16px 20px 16px 48px',
@@ -88,22 +88,7 @@ export default function ClientTracker({ defaultCode = '', currency = 'INR' }) {
             </button>
           </form>
 
-          {/* Quick Demo Code Pills */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginTop: '14px', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            <span>Try demo tracking codes:</span>
-            <button 
-              onClick={() => { setSearchCode('CCS-98421'); handleSearch('CCS-98421'); }}
-              style={{ background: 'rgba(0, 240, 255, 0.1)', border: '1px solid rgba(0, 240, 255, 0.3)', color: 'var(--cyan-glow)', padding: '2px 10px', borderRadius: '12px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
-            >
-              CCS-98421
-            </button>
-            <button 
-              onClick={() => { setSearchCode('CCS-55102'); handleSearch('CCS-55102'); }}
-              style={{ background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.3)', color: '#a78bfa', padding: '2px 10px', borderRadius: '12px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600 }}
-            >
-              CCS-55102
-            </button>
-          </div>
+          <p style={{textAlign:'center',marginTop:14,fontSize:'0.82rem',color:'var(--text-muted)'}}>For privacy, email addresses and sample demo codes cannot be used to access project records.</p>
         </div>
 
         {/* Error message */}
@@ -128,7 +113,7 @@ export default function ClientTracker({ defaultCode = '', currency = 'INR' }) {
                   {projectData.project_name}
                 </h3>
                 <div style={{ fontSize: '0.94rem', color: 'var(--text-muted)' }}>
-                  Client: <strong style={{ color: '#ffffff' }}>{projectData.client_name}</strong> ({projectData.client_email})
+                  Project tracking details
                 </div>
               </div>
 
